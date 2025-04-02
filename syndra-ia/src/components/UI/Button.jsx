@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+
 const StyledButton = styled.button`
   background-color: ${({ theme, variant }) => 
     variant === 'primary' ? theme.colors.primary : 'transparent'};
@@ -27,3 +28,5 @@ export const Button = ({ children, variant = 'primary', ...props }) => {
     </StyledButton>
   );
 };
+
+export default Button;

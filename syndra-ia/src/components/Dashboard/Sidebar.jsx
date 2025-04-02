@@ -1,12 +1,12 @@
 import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   FiMessageSquare, 
   FiSettings, 
   FiUpload, 
   FiLogOut,
   FiCreditCard,
-  FiBookOpen
+  FiShare2
 } from 'react-icons/fi';
 
 const SidebarContainer = styled.div`
@@ -44,6 +44,7 @@ const MenuItem = styled.div`
 `;
 
 const Sidebar = () => {
+  const location = useLocation();
   const navigate = useNavigate();
 
   return (
@@ -64,6 +65,14 @@ const Sidebar = () => {
       <MenuItem onClick={() => navigate('/integrations')}>
         <FiSettings /> Integrações
       </MenuItem>
+      
+      <MenuItem 
+        active={location.pathname === '/sharing'} 
+        onClick={() => navigate('/sharing')}
+          >
+        <FiShare2 /> Compartilhar
+      </MenuItem>
+
       <MenuItem onClick={() => navigate('/login')}>
         <FiLogOut /> Sair
       </MenuItem>

@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { Button } from '../../components/UI/Button';
 import { Input } from '../../components/UI/Input';
-import { FiLock, FiMail, FiUser, FiCreditCard } from 'react-icons/fi';
+import { FiLock, FiMail, FiUser } from 'react-icons/fi';
 
 const AuthContainer = styled.div`
   display: flex;
@@ -33,10 +33,7 @@ const AuthForm = styled.div`
   max-width: 400px;
 `;
 
-const FormTitle = styled.h2`
-  margin-bottom: 1.5rem;
-  color: ${({ theme }) => theme.colors.text};
-`;
+// Removed unused FormTitle styled component
 
 const TabContainer = styled.div`
   display: flex;
@@ -52,6 +49,12 @@ const Tab = styled.div`
   font-weight: ${({ active }) => active ? '600' : '400'};
 `;
 
+const ErrorMessage = styled.div`
+  color: #ff4d4f;
+  margin-bottom: 1rem;
+  text-align: center;
+`;
+
 const Login = () => {
   const [activeTab, setActiveTab] = useState('login');
   const [formData, setFormData] = useState({
@@ -60,11 +63,32 @@ const Login = () => {
     name: '',
     plan: 'free'
   });
+  const [emailError, setEmailError] = useState('');
+  const [registeredEmails, setRegisteredEmails] = useState([]);
   const navigate = useNavigate();
 
+  // Carrega emails cadastrados ao iniciar
+  useEffect(() => {
+  const emails = JSON.parse(localStorage.getItem('registeredEmails') || '[]');    setRegisteredEmails(emails);
+  }, []);
+    const emails = JSON.parse(localStorage.getItem('registeredEmails') || '[]');
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Simulação de login/cadastro bem-sucedido
+    
+    if (activeTab === 'register') {
+      // Verifica se email já está cadastrado
+      if (registeredEmails.includes(formData.email)) {
+        setEmailError('Este e-mail já está cadastrado');
+        return;
+      }
+      
+      // Adiciona o novo email à lista
+      const updatedEmails = [...registeredEmails, formData.email];
+      localStorage.setItem('registeredEmails', JSON.stringify(updatedEmails));
+      setRegisteredEmails(updatedEmails);
+    }
+    
+    // Simula login/cadastro bem-sucedido
     navigate('/dashboard');
   };
 
@@ -83,13 +107,21 @@ const Login = () => {
       <RightPanel>
         <AuthForm>
           <TabContainer>
-            <Tab active={activeTab === 'login'} onClick={() => setActiveTab('login')}>
+            <Tab active={activeTab === 'login'} onClick={() => {
+              setActiveTab('login');
+              setEmailError('');
+            }}>
               Login
             </Tab>
-            <Tab active={activeTab === 'register'} onClick={() => setActiveTab('register')}>
+            <Tab active={activeTab === 'register'} onClick={() => {
+              setActiveTab('register');
+              setEmailError('');
+            }}>
               Cadastro
             </Tab>
           </TabContainer>
+
+          {emailError && <ErrorMessage>{emailError}</ErrorMessage>}
 
           <form onSubmit={handleSubmit}>
             {activeTab === 'register' && (
@@ -109,7 +141,10 @@ const Login = () => {
                 placeholder="Email"
                 leftIcon={<FiMail />}
                 value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                onChange={(e) => {
+                  setFormData({...formData, email: e.target.value});
+                  setEmailError('');
+                }}
               />
             </div>
 

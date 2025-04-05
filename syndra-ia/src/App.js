@@ -12,6 +12,8 @@ import SupportPage from './pages/Support';
 import Payment from './pages/Payment';
 import TrainedChatbot from './pages/TrainedChatbot';
 import SharingPanel from './pages/SharingPanel';
+import Marketplace from './pages/Marketplace';
+
 
 function App() {
   return (
@@ -29,6 +31,7 @@ function App() {
           <Route path="/trained-chatbot" element={<TrainedChatbot />} />
           <Route path="/integrations" element={<Integrations />} />
           <Route path="/sharing" element={<SharingPanel />} />
+          <Route path="/marketplace" element={<Marketplace />} />
         </Routes>
       </Router>
     </ThemeProvider>

@@ -6,7 +6,8 @@ import {
   FiUpload, 
   FiLogOut,
   FiCreditCard,
-  FiShare2
+  FiShare2,
+  FiShoppingCart
 } from 'react-icons/fi';
 
 const SidebarContainer = styled.div`
@@ -72,6 +73,14 @@ const Sidebar = () => {
           >
         <FiShare2 /> Compartilhar
       </MenuItem>
+
+      <MenuItem 
+        active={location.pathname === '/marketplace'} 
+        onClick={() => navigate('/marketplace')}
+        >
+      <FiShoppingCart /> Marketplace
+
+    </MenuItem>
 
       <MenuItem onClick={() => navigate('/login')}>
         <FiLogOut /> Sair

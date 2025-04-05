@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import styled from 'styled-components';
 import { Button } from '../UI/Button';
-import { FiCreditCard, FiZap, FiDatabase } from 'react-icons/fi';
+import { FiCreditCard, FiAlertTriangle, FiCheck, FiZap } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
 
 const PlanContainer = styled.div`
   background-color: white;
@@ -33,7 +35,41 @@ const PlanFeatures = styled.ul`
   }
 `;
 
+const CancellationMessage = styled.div`
+  background-color: #fffbe6;
+  border: 1px solid #ffe58f;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+
+  svg {
+    margin-right: 0.5rem;
+    color: #faad14;
+  }
+`;
+
+const SuccessMessage = styled.div`
+  background-color: #f6ffed;
+  border: 1px solid #b7eb8f;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+
+  svg {
+    margin-right: 0.5rem;
+    color: #52c41a;
+  }
+`;
+
 const PlanInfo = ({ currentPlan = 'free' }) => {
+  const navigate = useNavigate();
+  const [showCancellation, setShowCancellation] = useState(false);
+  const [cancellationSuccess, setCancellationSuccess] = useState(false);
+
   const plans = {
     free: {
       name: 'Grátis',
@@ -42,7 +78,8 @@ const PlanInfo = ({ currentPlan = 'free' }) => {
         '100 mensagens/mês',
         'Suporte básico'
       ],
-      upgradeTo: 'pro'
+      upgradeTo: 'pro',
+      isPaid: false
     },
     pro: {
       name: 'Profissional',
@@ -52,7 +89,8 @@ const PlanInfo = ({ currentPlan = 'free' }) => {
         'Treinamento personalizado',
         'Suporte prioritário'
       ],
-      upgradeTo: 'enterprise'
+      upgradeTo: 'enterprise',
+      isPaid: true
     },
     enterprise: {
       name: 'Empresarial',
@@ -62,31 +100,137 @@ const PlanInfo = ({ currentPlan = 'free' }) => {
         'Treinamento dedicado',
         'Suporte 24/7'
       ],
-      upgradeTo: null
+      upgradeTo: null,
+      isPaid: true
     }
+  };
+
+  const handleUpgrade = () => {
+    navigate(`/payment?action=upgrade&plan=${plans[currentPlan].upgradeTo}`);
+  };
+
+  const handleManagePayment = () => {
+    navigate('/payment');
+  };
+
+  const handleCancelSubscription = () => {
+    setShowCancellation(false);
+    
+    // Simula diferentes comportamentos para planos pagos e gratuitos
+    if (plans[currentPlan].isPaid) {
+      console.log('Enviando e-mail de cancelamento para plano pago...');
+      console.log(`- Plano atual: ${plans[currentPlan].name}`);
+      console.log('- Acesso mantido até o final do período atual');
+    } else {
+      console.log('Usuário com plano gratuito solicitou cancelamento');
+      console.log('Nenhuma cobrança será realizada');
+    }
+    
+    setTimeout(() => {
+      setCancellationSuccess(true);
+    }, 1000);
+  };
+
+  const getCancellationMessage = () => {
+    if (plans[currentPlan].isPaid) {
+      return 'Seu acesso será mantido até o final do período atual.';
+    }
+    return 'Sua conta continuará ativa com os recursos do plano gratuito.';
+  };
+
+  const getSuccessMessage = () => {
+    if (plans[currentPlan].isPaid) {
+      return 'Enviamos um e-mail com os detalhes do cancelamento. Seu acesso será mantido até o final do período atual.';
+    }
+    return 'Sua assinatura foi removida. Sua conta continuará ativa com os recursos do plano gratuito.';
   };
 
   return (
     <PlanContainer>
       <PlanHeader>
-        <h4>Seu Plano: {plans[currentPlan].name}</h4>
+        <div>
+          <h4>Seu Plano Atual</h4>
+          <p style={{ color: '#6C63FF', fontWeight: 'bold' }}>{plans[currentPlan].name}</p>
+        </div>
         {plans[currentPlan].upgradeTo && (
-          <Button small>Upgrade</Button>
+          <Button 
+            size="small" 
+            onClick={handleUpgrade}
+          >
+            Upgrade
+          </Button>
         )}
       </PlanHeader>
 
       <PlanFeatures>
         {plans[currentPlan].features.map((feature, index) => (
           <li key={index}>
-            <FiZap size={16} />
+            <FiCheck />
             {feature}
           </li>
         ))}
       </PlanFeatures>
 
-      <Button variant="outline" fullWidth icon={<FiCreditCard />}>
+      <Button 
+        fullWidth 
+        icon={<FiCreditCard />}
+        onClick={handleManagePayment}
+        style={{ marginBottom: '0.5rem' }}
+      >
         Gerenciar pagamento
       </Button>
+
+      {/* Botão de cancelamento - SEMPRE VISÍVEL */}
+      {!showCancellation && !cancellationSuccess && (
+        <Button 
+          variant="outline" 
+          fullWidth 
+          onClick={() => setShowCancellation(true)}
+        >
+          Cancelar assinatura
+        </Button>
+      )}
+
+      {showCancellation && (
+        <div style={{ marginTop: '1rem' }}>
+          <CancellationMessage>
+            <FiAlertTriangle size={20} />
+            <div>
+              <p style={{ fontWeight: 'bold' }}>Tem certeza que deseja cancelar?</p>
+              <p style={{ fontSize: '0.9rem' }}>{getCancellationMessage()}</p>
+            </div>
+          </CancellationMessage>
+
+          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+            <Button 
+              variant="danger"
+              onClick={handleCancelSubscription}
+            >
+              Confirmar Cancelamento
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => setShowCancellation(false)}
+            >
+              Manter Assinatura
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {cancellationSuccess && (
+        <SuccessMessage>
+          <FiCheck size={20} />
+          <div>
+            <p style={{ fontWeight: 'bold' }}>
+              {plans[currentPlan].isPaid 
+                ? 'Assinatura cancelada com sucesso!' 
+                : 'Assinatura removida com sucesso!'}
+            </p>
+            <p style={{ fontSize: '0.9rem' }}>{getSuccessMessage()}</p>
+          </div>
+        </SuccessMessage>
+      )}
     </PlanContainer>
   );
 };
